@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  postgres:
+    build: ./postgres
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: pesquisa
+    ports:
+      - "5432:5432"
+    networks:
+      - dev-network
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mongodb:
+    build: ./mongodb
+    container_name: mongo-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: devuser
+      MONGO_INITDB_ROOT_PASSWORD: devpassword
+    ports:
+      - "27017:27017"
+    networks:
+      - dev-network
+    volumes:
+      - mongodata:/data/db
+
+  node-app:
+    build: ./node-app
+    container_name: node-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - mongodb
+    networks:
+      - dev-network
+    volumes:
+      - ./node-app:/usr/src/app
+    command: node app.js
+
+networks:
+  dev-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  mongodata:
